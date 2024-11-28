@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 
-import chalk from "chalk";
 import { parseArgs } from "node:util";
+import chalk from "chalk";
 import packageJson from "./package.json" with { type: "json" };
 
 // Enable chalk colors
