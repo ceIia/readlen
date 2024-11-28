@@ -25,10 +25,7 @@
     "lint": "biome lint . --write",
     "prepublishOnly": "bun check && bun run build"
   },
-  "files": [
-    "dist",
-    "README.md"
-  ],
+  "files": ["dist", "README.md"],
   "author": "ceIia <me@celiabourial.com>",
   "license": "MIT",
   "repository": {
