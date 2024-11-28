@@ -1,0 +1,30 @@
+{
+  "name": "readtime",
+  "version": "0.0.1",
+  "module": "index.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "commander": "^12.1.0"
+  },
+  "bin": {
+    "readtime": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "bun build index.ts --outdir ./dist",
+    "check": "biome check .",
+    "format": "biome format . --write",
+    "lint": "biome lint . --write",
+    "prepublishOnly": "bun check && bun build"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ]
+}
