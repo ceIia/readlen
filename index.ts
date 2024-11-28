@@ -1,7 +1,11 @@
 #!/usr/bin/env bun
 
 import chalk from "chalk";
-import { Command } from "commander";
+import { parseArgs } from "node:util";
+import packageJson from "./package.json" with { type: "json" };
+
+// Enable chalk colors
+chalk.level = 3;
 
 interface FileStats {
   path: string;
@@ -69,120 +73,169 @@ const formatNumber = (num: number): string => {
   return num.toLocaleString("en-US", { useGrouping: true });
 };
 
-const program = new Command();
+const { values, positionals } = parseArgs({
+  args: Bun.argv,
+  options: {
+    recursive: {
+      type: "boolean",
+      short: "r",
+      default: false,
+    },
+    help: {
+      type: "boolean",
+      short: "h",
+    },
+    version: {
+      type: "boolean",
+      short: "v",
+    },
+  },
+  allowPositionals: true,
+  strict: true,
+});
 
-program
-  .name("readlen")
-  .description("calculate reading statistics for text files")
-  .version(Bun.version)
-  .argument("<files...>", "files or directories to analyze")
-  .option("-r, --recursive", "process directories recursively", false)
-  .action(async (files: string[], options: { recursive: boolean }) => {
-    const results: FileStats[] = [];
+// Handle help
+if (values.help) {
+  console.log(`
+${chalk.cyan("readlen")} - calculate reading statistics for text files
 
-    for (const path of files) {
-      try {
-        if (await Bun.file(path).exists()) {
-          // handle single file directly
+${chalk.white("USAGE")}
+  readlen [options] <files...>
+
+${chalk.white("OPTIONS")}
+  -r, --recursive    process directories recursively
+  -h, --help         show this help message
+  -v, --version      show version number
+
+${chalk.white("EXAMPLES")}
+  readlen file.txt
+  readlen *.txt
+  readlen dir/ -r
+`);
+  process.exit(0);
+}
+
+// handle version
+if (values.version) {
+  console.log(
+    `${packageJson.name} ${packageJson.version} (bun ${Bun.version})`,
+  );
+  process.exit(0);
+}
+
+// get files from positionals (skip first two elements which are bun and script paths)
+const files = positionals.slice(2);
+
+if (files.length === 0) {
+  console.error(chalk.red("Error: No files specified"));
+  process.exit(1);
+}
+
+const results: FileStats[] = [];
+
+// Process files
+const processFiles = async () => {
+  for (const path of files) {
+    try {
+      if (await Bun.file(path).exists()) {
+        // handle single file directly
+        try {
+          const stats = await processFile(path);
+          results.push(stats);
+        } catch (err) {
+          console.error(chalk.red(`error processing ${path}:`, err));
+        }
+      } else {
+        // treat as directory pattern
+        const glob = new Bun.Glob(
+          values.recursive ? "**/*.{txt,md,html,json}" : "*.{txt,md,html,json}",
+        );
+
+        for await (const file of glob.scan({
+          cwd: path,
+          absolute: true,
+          onlyFiles: true,
+        })) {
           try {
-            const stats = await processFile(path);
+            const stats = await processFile(file);
             results.push(stats);
           } catch (err) {
-            console.error(chalk.red(`error processing ${path}:`, err));
-          }
-        } else {
-          // treat as directory pattern
-          const glob = new Bun.Glob(
-            options.recursive
-              ? "**/*.{txt,md,html,json}"
-              : "*.{txt,md,html,json}",
-          );
-
-          for await (const file of glob.scan({
-            cwd: path,
-            absolute: true,
-            onlyFiles: true,
-          })) {
-            try {
-              const stats = await processFile(file);
-              results.push(stats);
-            } catch (err) {
-              console.error(chalk.red(`error processing ${file}:`, err));
-            }
+            console.error(chalk.red(`error processing ${file}:`, err));
           }
         }
-      } catch (err) {
-        console.error(chalk.red(`error processing ${path}:`, err));
       }
+    } catch (err) {
+      console.error(chalk.red(`error processing ${path}:`, err));
     }
+  }
 
-    if (results.length === 0) {
-      console.log(chalk.yellow("no valid text files found."));
-      process.exit(0);
-    }
+  if (results.length === 0) {
+    console.log(chalk.yellow("no valid text files found."));
+    process.exit(0);
+  }
 
-    // individual file stats
-    for (const {
-      path,
-      wordCount,
-      charCount,
-      paragraphCount,
-      readTime,
-    } of results) {
-      if (results.length > 1) console.log(); // Add line break between files
-      console.log(chalk.cyan(`- ${path}`));
-      console.log(
-        chalk.whiteBright(`  words: ${chalk.white(formatNumber(wordCount))}`),
-      );
-      console.log(
-        chalk.whiteBright(
-          `  characters: ${chalk.white(formatNumber(charCount))}`,
-        ),
-      );
-      console.log(
-        chalk.whiteBright(
-          `  paragraphs: ${chalk.white(formatNumber(paragraphCount))}`,
-        ),
-      );
-      console.log(
-        chalk.whiteBright(
-          `  read time: ${chalk.white(formatReadTime(readTime))}`,
-        ),
-      );
-    }
+  // individual file stats
+  for (const {
+    path,
+    wordCount,
+    charCount,
+    paragraphCount,
+    readTime,
+  } of results) {
+    if (results.length > 1) console.log(); // Add line break between files
+    console.log(chalk.cyan(`- ${path}`));
+    console.log(
+      chalk.whiteBright(`  words: ${chalk.white(formatNumber(wordCount))}`),
+    );
+    console.log(
+      chalk.whiteBright(
+        `  characters: ${chalk.white(formatNumber(charCount))}`,
+      ),
+    );
+    console.log(
+      chalk.whiteBright(
+        `  paragraphs: ${chalk.white(formatNumber(paragraphCount))}`,
+      ),
+    );
+    console.log(
+      chalk.whiteBright(
+        `  read time: ${chalk.white(formatReadTime(readTime))}`,
+      ),
+    );
+  }
 
-    // Only show totals if there are multiple files
-    if (results.length > 1) {
-      const totalWords = results.reduce((sum, r) => sum + r.wordCount, 0);
-      const totalChars = results.reduce((sum, r) => sum + r.charCount, 0);
-      const totalParas = results.reduce((sum, r) => sum + r.paragraphCount, 0);
-      const totalTime = results.reduce((sum, r) => sum + r.readTime, 0);
+  // Only show totals if there are multiple files
+  if (results.length > 1) {
+    const totalWords = results.reduce((sum, r) => sum + r.wordCount, 0);
+    const totalChars = results.reduce((sum, r) => sum + r.charCount, 0);
+    const totalParas = results.reduce((sum, r) => sum + r.paragraphCount, 0);
+    const totalTime = results.reduce((sum, r) => sum + r.readTime, 0);
 
-      console.log(chalk.cyan("\ntotals:"));
-      console.log(
-        chalk.whiteBright(
-          `  files: ${chalk.white(formatNumber(results.length))}`,
-        ),
-      );
-      console.log(
-        chalk.whiteBright(`  words: ${chalk.white(formatNumber(totalWords))}`),
-      );
-      console.log(
-        chalk.whiteBright(
-          `  characters: ${chalk.white(formatNumber(totalChars))}`,
-        ),
-      );
-      console.log(
-        chalk.whiteBright(
-          `  paragraphs: ${chalk.white(formatNumber(totalParas))}`,
-        ),
-      );
-      console.log(
-        chalk.whiteBright(
-          `  total read time: ${chalk.white(formatReadTime(totalTime))}`,
-        ),
-      );
-    }
-  });
+    console.log(chalk.cyan("\ntotals:"));
+    console.log(
+      chalk.whiteBright(
+        `  files: ${chalk.white(formatNumber(results.length))}`,
+      ),
+    );
+    console.log(
+      chalk.whiteBright(`  words: ${chalk.white(formatNumber(totalWords))}`),
+    );
+    console.log(
+      chalk.whiteBright(
+        `  characters: ${chalk.white(formatNumber(totalChars))}`,
+      ),
+    );
+    console.log(
+      chalk.whiteBright(
+        `  paragraphs: ${chalk.white(formatNumber(totalParas))}`,
+      ),
+    );
+    console.log(
+      chalk.whiteBright(
+        `  total read time: ${chalk.white(formatReadTime(totalTime))}`,
+      ),
+    );
+  }
+};
 
-program.parse();
+processFiles();
