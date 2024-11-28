@@ -54,7 +54,7 @@ const formatReadTime = (minutes: number): string => {
   }
   if (remainingMinutes > 0) {
     parts.push(
-      `${remainingMinutes} ${remainingMinutes === 1 ? "minute" : "minutes"}`,
+      `${remainingMinutes} ${remainingMinutes === 1 ? "minute" : "minutes"}`
     );
   }
   if (seconds > 0 && hours === 0) {
@@ -72,7 +72,7 @@ const formatNumber = (num: number): string => {
 const program = new Command();
 
 program
-  .name("readtime")
+  .name("readlen")
   .description("calculate reading statistics for text files")
   .version(Bun.version)
   .argument("<files...>", "files or directories to analyze")
@@ -95,7 +95,7 @@ program
           const glob = new Bun.Glob(
             options.recursive
               ? "**/*.{txt,md,html,json}"
-              : "*.{txt,md,html,json}",
+              : "*.{txt,md,html,json}"
           );
 
           for await (const file of glob.scan({
@@ -132,22 +132,22 @@ program
       if (results.length > 1) console.log(); // Add line break between files
       console.log(chalk.cyan(`- ${path}`));
       console.log(
-        chalk.whiteBright(`  words: ${chalk.white(formatNumber(wordCount))}`),
+        chalk.whiteBright(`  words: ${chalk.white(formatNumber(wordCount))}`)
       );
       console.log(
         chalk.whiteBright(
-          `  characters: ${chalk.white(formatNumber(charCount))}`,
-        ),
+          `  characters: ${chalk.white(formatNumber(charCount))}`
+        )
       );
       console.log(
         chalk.whiteBright(
-          `  paragraphs: ${chalk.white(formatNumber(paragraphCount))}`,
-        ),
+          `  paragraphs: ${chalk.white(formatNumber(paragraphCount))}`
+        )
       );
       console.log(
         chalk.whiteBright(
-          `  read time: ${chalk.white(formatReadTime(readTime))}`,
-        ),
+          `  read time: ${chalk.white(formatReadTime(readTime))}`
+        )
       );
     }
 
@@ -161,26 +161,26 @@ program
       console.log(chalk.cyan("\ntotals:"));
       console.log(
         chalk.whiteBright(
-          `  files: ${chalk.white(formatNumber(results.length))}`,
-        ),
+          `  files: ${chalk.white(formatNumber(results.length))}`
+        )
       );
       console.log(
-        chalk.whiteBright(`  words: ${chalk.white(formatNumber(totalWords))}`),
-      );
-      console.log(
-        chalk.whiteBright(
-          `  characters: ${chalk.white(formatNumber(totalChars))}`,
-        ),
+        chalk.whiteBright(`  words: ${chalk.white(formatNumber(totalWords))}`)
       );
       console.log(
         chalk.whiteBright(
-          `  paragraphs: ${chalk.white(formatNumber(totalParas))}`,
-        ),
+          `  characters: ${chalk.white(formatNumber(totalChars))}`
+        )
       );
       console.log(
         chalk.whiteBright(
-          `  total read time: ${chalk.white(formatReadTime(totalTime))}`,
-        ),
+          `  paragraphs: ${chalk.white(formatNumber(totalParas))}`
+        )
+      );
+      console.log(
+        chalk.whiteBright(
+          `  total read time: ${chalk.white(formatReadTime(totalTime))}`
+        )
       );
     }
   });

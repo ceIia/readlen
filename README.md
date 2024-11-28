@@ -1,25 +1,25 @@
-# 📚 readtime
+# 📚 readlen
 
 calculate reading stats for your text files with scientific precision.
 
 ## why?
 
-ever wondered how long it'll take to read that markdown file? or how many words are in your documentation? `readtime` gotchu covered with reading time estimates based on actual research¹.
+ever wondered how long it'll take to read that markdown file? or how many words are in your documentation? `readlen` gotchu covered with reading time estimates based on actual research¹.
 
 ## usage
 
 ```bash
 # basic usage
-bun x readtime README.md
+bun x readlen README.md
 
 # multiple files
-bun x readtime docs/*.md
+bun x readlen docs/*.md
 
 # recursive mode (process all text files in subdirectories)
-bun x readtime docs/ -r
+bun x readlen docs/ -r
 
 # install globally (if you want to)
-bun install -g readtime
+bun install -g readlen
 ```
 
 ## output

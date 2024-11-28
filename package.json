@@ -1,5 +1,5 @@
 {
-  "name": "readtime",
+  "name": "readlen",
   "description": "calculate reading stats for your text files with scientific precision.",
   "version": "0.0.1",
   "module": "index.ts",
@@ -16,7 +16,7 @@
     "commander": "^12.1.0"
   },
   "bin": {
-    "readtime": "./dist/index.js"
+    "readlen": "./dist/index.js"
   },
   "scripts": {
     "build": "bun build index.ts --outdir ./dist",
@@ -25,17 +25,20 @@
     "lint": "biome lint . --write",
     "prepublishOnly": "bun check && bun run build"
   },
-  "files": ["dist", "README.md"],
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "author": "ceIia <me@celiabourial.com>",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ceIia/readtime"
+    "url": "https://github.com/ceIia/readlen"
   },
-  "bugs": "https://github.com/ceIia/readtime/issues",
-  "homepage": "https://github.com/ceIia/readtime",
+  "bugs": "https://github.com/ceIia/readlen/issues",
+  "homepage": "https://github.com/ceIia/readlen",
   "keywords": [
-    "readtime",
+    "readlen",
     "read time",
     "reading time",
     "reading stats",
