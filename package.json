@@ -23,9 +23,12 @@
     "check": "biome check .",
     "format": "biome format . --write",
     "lint": "biome lint . --write",
-    "prepublishOnly": "bun check && bun build"
+    "prepublishOnly": "bun check && bun run build"
   },
-  "files": ["dist", "README.md"],
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "author": "ceIia <me@celiabourial.com>",
   "license": "MIT",
   "repository": {
