@@ -41,6 +41,13 @@ file: README.md
 
 ¹ [Brysbaert, M. (2019). How many words do we read per minute? A review and meta-analysis of reading rate. Journal of Memory and Language, 109, Article 104047.](https://psycnet.apa.org/record/2019-59523-001).
 
+## flags
+
+- `-t, --totalOnly` show only totals
+- `-r, --recursive` process all text files in subdirectories
+- `-h, --help` show help
+- `-v, --version` show version
+
 ---
 
 built with ❤️ using [bun](https://bun.sh)
