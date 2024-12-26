@@ -1,7 +1,7 @@
 {
   "name": "readlen",
   "description": "calculate reading stats for your text files with scientific precision.",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "module": "index.ts",
   "type": "module",
   "devDependencies": {

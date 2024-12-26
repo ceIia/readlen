@@ -89,6 +89,11 @@ const { values, positionals } = parseArgs({
       type: "boolean",
       short: "v",
     },
+    totalOnly: {
+      type: "boolean",
+      short: "t",
+      default: false,
+    },
   },
   allowPositionals: true,
   strict: true,
@@ -106,6 +111,7 @@ ${chalk.white("OPTIONS")}
   -r, --recursive    process directories recursively
   -h, --help         show this help message
   -v, --version      show version number
+  -t, --totalOnly    show only totals (default: false)
 
 ${chalk.white("EXAMPLES")}
   readlen file.txt
@@ -175,33 +181,35 @@ const processFiles = async () => {
   }
 
   // individual file stats
-  for (const {
-    path,
-    wordCount,
-    charCount,
-    paragraphCount,
-    readTime,
-  } of results) {
-    if (results.length > 1) console.log(); // Add line break between files
-    console.log(chalk.cyan(`- ${path}`));
-    console.log(
-      chalk.whiteBright(`  words: ${chalk.white(formatNumber(wordCount))}`),
-    );
-    console.log(
-      chalk.whiteBright(
-        `  characters: ${chalk.white(formatNumber(charCount))}`,
-      ),
-    );
-    console.log(
-      chalk.whiteBright(
-        `  paragraphs: ${chalk.white(formatNumber(paragraphCount))}`,
-      ),
-    );
-    console.log(
-      chalk.whiteBright(
-        `  read time: ${chalk.white(formatReadTime(readTime))}`,
-      ),
-    );
+  if (!values.totalOnly) {
+    for (const {
+      path,
+      wordCount,
+      charCount,
+      paragraphCount,
+      readTime,
+    } of results) {
+      if (results.length > 1) console.log(); // Add line break between files
+      console.log(chalk.cyan(`- ${path}`));
+      console.log(
+        chalk.whiteBright(`  words: ${chalk.white(formatNumber(wordCount))}`),
+      );
+      console.log(
+        chalk.whiteBright(
+          `  characters: ${chalk.white(formatNumber(charCount))}`,
+        ),
+      );
+      console.log(
+        chalk.whiteBright(
+          `  paragraphs: ${chalk.white(formatNumber(paragraphCount))}`,
+        ),
+      );
+      console.log(
+        chalk.whiteBright(
+          `  read time: ${chalk.white(formatReadTime(readTime))}`,
+        ),
+      );
+    }
   }
 
   // Only show totals if there are multiple files
@@ -211,7 +219,7 @@ const processFiles = async () => {
     const totalParas = results.reduce((sum, r) => sum + r.paragraphCount, 0);
     const totalTime = results.reduce((sum, r) => sum + r.readTime, 0);
 
-    console.log(chalk.cyan("\ntotals:"));
+    console.log(chalk.cyan(`${!values.totalOnly ? "\n" : ""}totals:`));
     console.log(
       chalk.whiteBright(
         `  files: ${chalk.white(formatNumber(results.length))}`,
